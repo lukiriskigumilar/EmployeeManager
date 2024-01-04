@@ -1,47 +1,40 @@
 import 'dart:convert';
 
-import 'package:employemanager/pages/homepage.dart';
 import 'package:employemanager/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class AddEmployee extends StatefulWidget {
+  const AddEmployee({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<AddEmployee> createState() => _AddEmployeeState();
 }
 
-TextEditingController emailController = TextEditingController(); 
-TextEditingController passwordController = TextEditingController();
+class _AddEmployeeState extends State<AddEmployee> {
 
-void login(BuildContext context,String email, password) async{
+  TextEditingController nameEmployeeController = TextEditingController(); 
+TextEditingController jobTittleController = TextEditingController();
+
+void addEmployee(BuildContext context,String name, job) async{
   try{
     Response response =  await post(
-      Uri.parse('https://reqres.in/api/login'),
+      Uri.parse('https://reqres.in/api/users'),
       body: {
-        'email': email, 
-        'password': password,
+        'name':name, 
+        'job': job,
       }
-    );  
+    );
       if (!context.mounted) return;
-    if (response.statusCode == 200){
-     // Berhasil
-      Map<String, dynamic> responseData = json.decode(response.body);
-      if (responseData.containsKey('token')) {
-        Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => const HomePage()),
-                (Route<dynamic> route) => false,
-              );
+    if (response.statusCode == 201){
+        var data = jsonDecode(response.body.toString());
+        var id = data["id"];
+        _showSnackBarTrue(context, "Data successfully created with ID $id");
+      
       } else {
-       _showSnackBar(context, "Incorrect username or password");
+       _showSnackBar(context, "Data Failed to Create");
       }
 
-    }else{
-           _showSnackBar(context, "Incorrect username or password");
-    }
   } catch(e){
     e.toString();
   }
@@ -52,30 +45,48 @@ void _showSnackBar(BuildContext context, String message) {
     content: Text(message),
     backgroundColor: Colors.red,
   );
-
   
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
+void _showSnackBarTrue(BuildContext context, String message) {
+  final snackBarTrue = SnackBar(
+    content: Text(message),
+    backgroundColor: Colors.green,
+  );
+  
+  ScaffoldMessenger.of(context).showSnackBar(snackBarTrue);
+}
 
-class _LoginPageState extends State<LoginPage> {
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(onPressed: (){
+          Navigator.pop(context);
+        }, icon:const Icon(Icons.close)),
+        iconTheme: IconThemeData(
+          color: Colors.white
+        ),
+        backgroundColor: primaryColor,
+        
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-             Text("EMPLOYEE MANAGER", style:primaryTextColor.copyWith(fontSize: 20, fontWeight:bold)),
+             Text("ADD EMPLOYEE MANAGER", style:primaryTextColor.copyWith(fontSize: 20, fontWeight:bold)),
 
             //Form Input Email
              const SizedBox(height: 20,),
             TextField(
-              controller: emailController,
+             controller: nameEmployeeController,
               decoration: InputDecoration(
-                hintText: "Email Addres",
+                hintText: "Full Name Employee",
                 border: OutlineInputBorder(
                   borderSide: BorderSide(
                     color: primaryColor,
@@ -91,9 +102,9 @@ class _LoginPageState extends State<LoginPage> {
 
             //Form input password
             TextField(
-              controller: passwordController,
+              controller: jobTittleController,
               decoration: InputDecoration(
-                hintText: "Password",
+                hintText: "Jobs Tittle",
                 border: OutlineInputBorder(
                   borderSide: BorderSide(
                     color: primaryColor,
@@ -102,15 +113,15 @@ class _LoginPageState extends State<LoginPage> {
                   borderRadius: BorderRadius.circular(20.0),
                 ),
               ),
-              obscureText: true,
+             
             ),
             const SizedBox(
               height: 15,
             ),
 
-            GestureDetector(
+       GestureDetector(
               onTap: () {
-                login(context,emailController.text.toString(), passwordController.text.toString());
+               addEmployee(context,nameEmployeeController.text.toString(), jobTittleController.text.toString());
               },
               child: Container(
                 height: 60, 
@@ -120,10 +131,11 @@ class _LoginPageState extends State<LoginPage> {
                   borderRadius: BorderRadius.circular(30)
                 ),
                 child: Center(
-                  child: Text("Sign In", style:whiteTextStyle,),
+                  child: Text("Add Now", style:whiteTextStyle,),
                 ),
               ),
             )
+           
           ],
         ),
       ),
