@@ -2,7 +2,12 @@
 
 A new Flutter project.
 
-## Getting Started
+## Download Apps here
+
+
+## username & password:
+"email": "eve.holt@reqres.in",
+"password": "cityslicka"
 
 This project is a starting point for a Flutter application.
 
